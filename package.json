@@ -1,0 +1,31 @@
+{
+  "name": "generic-db-client",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Spin wheel backend starter using a generic Postgres-compatible client",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "db:create-tables": "node scripts/create-tables.js",
+    "db:migrate-notify": "node scripts/add-notify-column.js",
+    "db:migrate-recharge-gate": "node scripts/add-recharge-gate-column.js",
+    "db:test": "node scripts/test-connection.js",
+    "monitor": "node scripts/monitor.js",
+    "monitor:watch": "node scripts/monitor.js --watch",
+    "job:recharge-gate": "node scripts/run-recharge-gate-job.js",
+    "job:recharge-gate:dry": "node scripts/run-recharge-gate-job.js --dry-run",
+    "db:migrate-reward-engine": "node scripts/add-reward-plan-tables.js",
+    "db:rollback-reward-engine": "node scripts/add-reward-plan-tables.js --down",
+    "job:reward-scoring": "node scripts/run-reward-scoring-job.js",
+    "job:reward-scoring:dry": "node scripts/run-reward-scoring-job.js --dry-run",
+    "test": "node --test \"test/**/*.test.js\"",
+    "test:reward-decks": "node scripts/test-reward-decks.js",
+    "test:reward-parity-fixture": "python3 scripts/generate-reward-parity-fixture.py"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "pg": "^8.16.3"
+  }
+}

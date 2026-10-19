@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Dostt Spin Wheel</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script>localStorage.removeItem('admin_theme');</script>
+  <style>html,body{background:#0f172a!important;color:#e2e8f0!important}</style>
+  <link rel="stylesheet" href="/admin.css?v=20260511i">
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <img src="/brand-assets/Dostt_logo_white_large.png" alt="Dostt" class="login-logo">
+      <h2>Admin Dashboard</h2>
+      <input id="adminUser" type="text" placeholder="Username" autocomplete="username">
+      <input id="adminPass" type="password" placeholder="Password" autocomplete="current-password">
+      <button id="loginBtn">Login</button>
+      <p id="loginError" class="login-error"></p>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard" class="hidden">
+    <header class="admin-header">
+      <div class="header-left">
+        <img src="/brand-assets/Dostt_logo_white_large.png" alt="Dostt" class="header-logo">
+        <span class="header-title">Admin Dashboard</span>
+      </div>
+      <div class="header-right">
+        <button id="themeBtn" class="theme-btn">☀️ Light</button>
+        <button id="logoutBtn" class="logout-btn">Logout</button>
+      </div>
+    </header>
+
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="visual">📊 Visual</button>
+      <button class="tab-btn" data-tab="data">📋 Data</button>
+      <button class="tab-btn" data-tab="transfers">🔄 Failed Transfers</button>
+    </nav>
+
+    <!-- TAB: VISUAL -->
+    <div id="tab-visual" class="tab-pane">
+      <div id="overviewCards" class="cards-grid"></div>
+
+      <div class="section-title">Last 30 Days</div>
+      <div class="charts-grid">
+        <div class="chart-card"><canvas id="chartSpins"></canvas></div>
+        <div class="chart-card"><canvas id="chartPlayers"></canvas></div>
+        <div class="chart-card"><canvas id="chartDAU"></canvas></div>
+        <div class="chart-card"><canvas id="chartTransfers"></canvas></div>
+        <div class="chart-card"><canvas id="chartCoinsWon"></canvas></div>
+        <div class="chart-card"><canvas id="chartCoinsTransferred"></canvas></div>
+      </div>
+
+      <div class="section-title">Day-over-Day — each bar capped at today's current time</div>
+      <div class="charts-grid" id="ddrChartsGrid">
+        <div class="chart-card"><canvas id="ddrSpins"></canvas></div>
+        <div class="chart-card"><canvas id="ddrPlayers"></canvas></div>
+        <div class="chart-card"><canvas id="ddrDAU"></canvas></div>
+        <div class="chart-card"><canvas id="ddrCoinsWon"></canvas></div>
+        <div class="chart-card"><canvas id="ddrCoinsXfer"></canvas></div>
+        <div class="chart-card"><canvas id="ddrTransfers"></canvas></div>
+      </div>
+
+      <div class="section-title">Breakdowns</div>
+      <div class="charts-grid charts-grid-2">
+        <div class="chart-card"><canvas id="chartTransferStatus"></canvas></div>
+        <div class="chart-card"><canvas id="chartRewards"></canvas></div>
+      </div>
+
+      <div class="section-title">Retention</div>
+      <div class="chart-card chart-full"><canvas id="chartRetention"></canvas></div>
+
+      <div class="section-title">Cohort Retention — by Registration Date</div>
+      <div class="cohort-controls">
+        <label>Pick a registration date:</label>
+        <input type="date" id="cohortDatePicker">
+        <button class="filter-btn" id="cohortLoadBtn">Load</button>
+        <span id="cohortLabel" class="filter-label"></span>
+      </div>
+      <div class="chart-card chart-full"><canvas id="chartCohort"></canvas></div>
+
+      <div class="section-title">Player Behaviour</div>
+      <div id="behaviourCards" class="cards-grid"></div>
+
+      <div class="section-title">Top 10 Players</div>
+      <div class="table-wrap">
+        <table id="topPlayersTable" class="data-table">
+          <thead><tr><th>#</th><th>Mobile</th><th>Name</th><th>Total Spins</th><th>Total Coins</th><th>Transferred</th><th>Wallet Balance</th><th>Last Spin</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="section-title">Reward Engine <span id="rewardEngineStatus" class="filter-label"></span></div>
+      <div id="rewardRunCards" class="cards-grid"></div>
+      <div class="table-wrap">
+        <table id="rewardRunsTable" class="data-table">
+          <thead><tr><th>Scored for</th><th>Plans start</th><th>Mode</th><th>Status</th><th>Regular payers</th><th>Median</th><th>Coins/share</th><th>All payers vs budget</th><th>New plans</th><th>Planned vs budget</th><th>Arms</th><th>Cap</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="table-wrap">
+        <table id="rewardBandsTable" class="data-table">
+          <thead><tr><th>Score band</th><th>Users</th><th>Avg coins</th><th>Coins</th><th>% of coins</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="table-wrap">
+        <table id="rewardRedemptionTable" class="data-table">
+          <thead><tr><th>Run</th><th>Mode</th><th>Segment</th><th>Arm</th><th>Plans</th><th>Planned coins</th><th>Redeemed coins</th><th>Redeemed %</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="cohort-controls">
+        <label>Look up a player:</label>
+        <input type="text" id="rewardPlayerInput" placeholder="Dostt user id or mobile">
+        <button class="filter-btn" id="rewardPlayerBtn">Show plans</button>
+        <span id="rewardPlayerLabel" class="filter-label"></span>
+      </div>
+      <div class="table-wrap">
+        <table id="rewardPlayerTable" class="data-table">
+          <thead><tr><th>Plan</th><th>Progress</th><th>Mode</th><th>Segment / arm</th><th>Score (money · calls · shop · wallet · profile)</th><th>Median</th><th>Share</th><th>Coins</th><th>Deck</th><th>Cards (✓ drawn)</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB: DATA -->
+    <div id="tab-data" class="tab-pane hidden">
+      <div class="data-section">
+        <div class="data-section-header">
+          <h3>All Players</h3>
+          <button class="dl-btn" data-type="players">⬇ Download CSV</button>
+        </div>
+        <div class="table-wrap">
+          <table id="playersTable" class="data-table">
+            <thead><tr><th>ID</th><th>Mobile</th><th>Name</th><th>Total Coins</th><th>Transferred</th><th>Wallet Balance</th><th>Total Spins</th><th>Registered</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="data-section">
+        <div class="data-section-header">
+          <h3>Spin Events</h3>
+          <div class="filter-row">
+            <input id="spinDateFilter" type="date" placeholder="Filter by date">
+            <button class="filter-btn" id="filterSpinsBtn">Filter</button>
+            <button class="dl-btn" data-type="spins">⬇ Download CSV</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="spinsTable" class="data-table">
+            <thead><tr><th>ID</th><th>Mobile</th><th>Name</th><th>Reward</th><th>Coins</th><th>Spin Date</th><th>Time</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="data-section">
+        <div class="data-section-header">
+          <h3>All Transfers</h3>
+          <div class="filter-row">
+            <input id="transferDateFilter" type="date">
+            <input id="transferMobileFilter" type="text" placeholder="Mobile number">
+            <select id="transferStatusFilter">
+              <option value="">All statuses</option>
+              <option value="success">Success</option>
+              <option value="mock_success">Mock Success</option>
+              <option value="failed_provider">Failed (Provider)</option>
+              <option value="failed_not_registered">Failed (Not Registered)</option>
+              <option value="submitted">Submitted</option>
+            </select>
+            <button class="filter-btn" id="filterTransfersBtn">Filter</button>
+            <button class="dl-btn" data-type="transfers">⬇ Download CSV</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="transfersTable" class="data-table">
+            <thead><tr><th>ID</th><th>Mobile</th><th>Name</th><th>Coins</th><th>Status</th><th>Error</th><th>Wallet</th><th>Date</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: FAILED TRANSFERS -->
+    <div id="tab-transfers" class="tab-pane hidden">
+      <div class="data-section-header">
+        <h3>Failed Transfers</h3>
+        <div class="filter-row">
+          <input id="ftDateFilter" type="date">
+          <input id="ftMobileFilter" type="text" placeholder="Mobile number">
+          <button class="filter-btn" id="ftFilterBtn">Filter</button>
+          <button class="filter-btn" id="ftClearBtn" style="background:#334155">Clear</button>
+          <button class="retry-all-btn" id="retryAllBtn">🔄 Retry All</button>
+          <button class="dl-btn" id="ftDownloadBtn">⬇ Download CSV</button>
+        </div>
+      </div>
+
+      <div id="retryStatus" class="retry-status hidden"></div>
+      <div id="ftFilterLabel" class="filter-label"></div>
+
+      <div class="table-wrap">
+        <table id="failedTable" class="data-table">
+          <thead><tr><th>ID</th><th>Mobile</th><th>Name</th><th>Coins Requested</th><th>Status</th><th>Error</th><th>Wallet Balance</th><th>Date</th><th>Action</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay hidden">
+      <div class="loading-spinner"></div>
+      <p>Loading...</p>
+    </div>
+  </div>
+
+  <script type="module" src="/admin.js?v=20261019a"></script>
+</body>
+</html>

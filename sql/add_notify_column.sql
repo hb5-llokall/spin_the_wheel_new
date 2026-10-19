@@ -1,0 +1,2 @@
+ALTER TABLE transfer_requests
+ADD COLUMN IF NOT EXISTS notify_user BOOLEAN DEFAULT FALSE;
